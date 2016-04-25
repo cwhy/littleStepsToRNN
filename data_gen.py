@@ -1,3 +1,6 @@
+"""
+Module for fake-data generation for the littleStepsToRNN project
+"""
 import numpy as np
 import bokeh.plotting as bp
 from bokeh.palettes import Spectral11, Blues9, Greys9
