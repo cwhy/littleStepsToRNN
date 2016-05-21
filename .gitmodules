@@ -1,3 +1,6 @@
 [submodule "reveal.js"]
 	path = reveal.js
 	url = https://github.com/hakimel/reveal.js.git
+[submodule "toy_data"]
+	path = toy_data
+	url = git@github.com:cwhy/toy_data.git
