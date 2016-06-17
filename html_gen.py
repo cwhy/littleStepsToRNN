@@ -17,7 +17,7 @@ slide_exporter = nbconvert.SlidesExporter(config=c)
 html_exporter = nbconvert.HTMLExporter()
 for nb_fname in nb_fnames:
     nb_path = op.join('notebooks', nb_fname)
-    nb_name = nb_fname.split('.')[0]
+    nb_name = ' '.join(nb_fname.split('.')[:-1])
 
     (body_html, _) = html_exporter.from_filename(nb_path)
     (body_slides, _) = slide_exporter.from_filename(nb_path)
