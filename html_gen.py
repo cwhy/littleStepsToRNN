@@ -30,6 +30,7 @@ for nb_fname in nb_fnames:
         slides_file.write(body_slides)
     nb_names.append(nb_name)
 
+nb_names.sort()
 nbs_json = json.dumps(nb_names)
 with open('nbs.json', 'w') as _file:
     _file.write(nbs_json)
