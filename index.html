@@ -2,29 +2,49 @@
 <html>
 <head><meta charset="utf-8" />
 <title>Little Steps to RNN</title>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body>
+<body class="container">
+<div class="col s12 m4 l8">
 <header>
+    <h3>
 Little Steps to RNN
+    </h3>
 </header>
-<ul>
+<ul class="collection">
 </ul>
+</div>
 
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
 <script type="text/javascript">
 jQuery.getJSON( "nbs.json" , function( result ){
   jQuery.each(result, function(i, e){
     var li = document.createElement("li");
-    var a1 = document.createElement("a");
-    a1.href = e + '.html';
-    a1.innerHTML = " (Notebook)";
-    var a2 = document.createElement("a");
-    a2.href = e + '_slides.html';
-    a2.innerHTML = e;
+    li.className += "collection-item";
+    var div = document.createElement("div");
+    div.innerHTML = '<b>' + e + ':</b>';
+    var a_note = document.createElement("a");
+    var a_slide = document.createElement("a");
+    a_note.href = e + '.html';
+    a_slide.href = e + '_slides.html';
+    a_note.className += "secondary-content";
+    a_slide.className += "secondary-content";
+    a_note.innerHTML = '<i class="material-icons">description</i>';
+    a_slide.innerHTML = '<i class="material-icons">picture_in_picture</i>';
+    //var a1 = document.createElement("a");
+    //a1.href = e + '.html';
+    //a1.innerHTML = " (Notebook)";
+    //var a2 = document.createElement("a");
+    //a2.href = e + '_slides.html';
+    //a2.className += "className";
+    //a2.innerHTML = e;
 
-    li.appendChild(a2);
-    li.appendChild(a1);
-    $("body>ul").append(li);
+    div.appendChild(a_note);
+    div.appendChild(a_slide);
+    li.appendChild(div)
+    $("body>div>ul").append(li);
   });
 });
 </script>
