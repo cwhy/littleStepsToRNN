@@ -15,10 +15,15 @@ Little Steps to RNN
 jQuery.getJSON( "nbs.json" , function( result ){
   jQuery.each(result, function(i, e){
     var li = document.createElement("li");
-    var a = document.createElement("a");
-    a.href = e + '.html';
-    a.innerHTML = e;
-    li.appendChild(a);
+    var a1 = document.createElement("a");
+    a1.href = e + '.html';
+    a1.innerHTML = " (Notebook)";
+    var a2 = document.createElement("a");
+    a2.href = e + '_slides.html';
+    a2.innerHTML = e;
+
+    li.appendChild(a2);
+    li.appendChild(a1);
     $("body>ul").append(li);
   });
 });
