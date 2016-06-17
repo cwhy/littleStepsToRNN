@@ -191,6 +191,8 @@ a.anchor-link {
 </div>
 {% block post_slides %}
 <script>
+var tmp_Interval = setInterval;
+setInterval = function(a, b){};
 require(
     {
       // it makes sense to wait a little bit when you are loading
@@ -226,11 +228,12 @@ require(
             MathJax.Hub.Rerender(Reveal.getCurrentSlide());
           }
         };
-        //Reveal.addEventListener('slidechanged', update);
-        //var update_scroll = function(event){
-        //  $(".reveal").scrollTop(0);
-        //};
-        //Reveal.addEventListener('slidechanged', update_scroll);
+        Reveal.addEventListener('slidechanged', update);
+        var update_scroll = function(event){
+          $(".reveal").scrollTop(0);
+        };
+        Reveal.addEventListener('slidechanged', update_scroll);
+        setTimeout(function(){setInterval = tmp_Interval;}, 0);
     }
 );
 </script>

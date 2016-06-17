@@ -11860,10 +11860,10 @@ a.anchor-link {
 
 
 
-<div id="3089a95a-d779-4892-9dcd-1155ff2a9139"></div>
+<div id="4ea15c16-21fa-43ea-a673-b729cb09ae66"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#3089a95a-d779-4892-9dcd-1155ff2a9139');
+var element = $('#4ea15c16-21fa-43ea-a673-b729cb09ae66');
 
 (function(global) {
   function now() {
@@ -12486,6 +12486,8 @@ $$
 </div>
 
 <script>
+var tmp_Interval = setInterval;
+setInterval = function(a, b){};
 require(
     {
       // it makes sense to wait a little bit when you are loading
@@ -12521,11 +12523,12 @@ require(
             MathJax.Hub.Rerender(Reveal.getCurrentSlide());
           }
         };
-        //Reveal.addEventListener('slidechanged', update);
-        //var update_scroll = function(event){
-        //  $(".reveal").scrollTop(0);
-        //};
-        //Reveal.addEventListener('slidechanged', update_scroll);
+        Reveal.addEventListener('slidechanged', update);
+        var update_scroll = function(event){
+          $(".reveal").scrollTop(0);
+        };
+        Reveal.addEventListener('slidechanged', update_scroll);
+        setTimeout(function(){setInterval = tmp_Interval;}, 0);
     }
 );
 </script>
