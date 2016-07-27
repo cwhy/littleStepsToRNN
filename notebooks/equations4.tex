@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage[english]{babel}
+
+%%%%%%%%%% Start TeXmacs macros
+\newcommand{\mathd}{\mathrm{d}}
+\newcommand{\nocomma}{}
+\newcommand{\noplus}{}
+%%%%%%%%%% End TeXmacs macros
+
+\begin{document}
+
+\begin{eqnarray*}
+  &  & \max_f \log \left( \prod_z C_1 \exp \left( \frac{( f ( x_z) -
+  y_z)}{C_2} \right) \right)\\
+  & = & \max_f  \sum_z  ( f ( x_z) - y_z)^2 + \log ( C)\\
+  & = & \max_f  \sum_z  ( f ( x_z) - y_z)^2
+\end{eqnarray*}
+\begin{eqnarray*}
+  &  & 
+\end{eqnarray*}
+\begin{eqnarray*}
+  \frac{\mathd \ell}{\mathd w_{i \nocomma j}}  & = & \frac{\mathd}{\mathd w_{i
+  \nocomma j}^{( n)}}  \sum_z  ( f ( x_z) - y_z)^2\\
+  & = & 2 ( f ( x) - y)  \frac{\mathd}{\mathd w_{i \nocomma \nocomma j}^{(
+  n)}}  ( f^{} ( x) - y)\\
+  & = & 2 ( f ( x) - y)  \frac{\mathd \sum_j w_{i \nocomma j}^{( n)} a (
+  f_j^{( n - 1)} ( x))}{\mathd w_{i \nocomma j}^{( n - 1)}}\\
+  & = & 2 ( f ( x) - y)  \frac{\mathd w_{i \nocomma j}^{( n)} a ( f_j^{( n -
+  1)} ( x))}{\mathd w_{i \nocomma j}^{( n - 1)}}\\
+  & = & 2 ( f ( x) - y) a ( f_j^{( n - 1)} ( x))
+\end{eqnarray*}
+\begin{eqnarray*}
+  \frac{\mathd \ell}{\mathd w_{j \nocomma k}}  & = & 2 ( f ( x) - y) 
+  \frac{\mathd \sum_i w_{i \nocomma j}^{( n)} a ( f_j^{( n - 1)} ( x)) -
+  y}{\mathd w_{j \nocomma k}^{( n - 1)}}\\
+  & = & 2 ( f ( x) - y)  \frac{\mathd \sum_i w_{i \nocomma j}^{( n)} a (
+  f_j^{( n - 1)} ( x))}{\mathd w_{j \nocomma k}^{( n - 1)}}\\
+  & = & 2 ( f ( x) - y)  \sum_i w_{i \nocomma j}  \frac{\mathd a ( f_j^{( n -
+  1)} ( x))}{\mathd f_j^{( n - 1)} ( x)}  \frac{\mathd}{\mathd w_{j \nocomma
+  k}^{( n - 1)}}  ( f_j^{( n - 1)} ( x))\\
+  & = & 2 ( f ( x) - y)  \sum_i w_{i \nocomma j} a'  \frac{\mathd}{\mathd
+  w_{j \nocomma k}^{( n - 1)}}  \left( \sum_k w_{j \nocomma k}^{( n - 1)} a (
+  f_k^{( n - 2)}  ( x)) \right)\\
+  & = & 2 ( f ( x) - y)  \sum_i w_{i \nocomma j} a' a ( f_k^{( n - 2)}  ( x))
+\end{eqnarray*}
+
+\end{document}
