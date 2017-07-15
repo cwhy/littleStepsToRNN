@@ -1,63 +1,8 @@
-
 <!DOCTYPE html>
 <html>
-<head>
-
-<meta charset="utf-8" />
-<meta http-equiv="X-UA-Compatible" content="chrome=1" />
-
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-<title>5. A Minimalist Recurrent Network slides</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<head><meta charset="utf-8" />
+<title>6. Dynamic LSTM using Tensorflow's native API</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-
-<!-- General and theme style sheets -->
-<link rel="stylesheet" href="reveal.js/css/reveal.css">
-<link rel="stylesheet" href="reveal.js/css/theme/serif.css" id="theme">
-
-<!-- If the query includes 'print-pdf', include the PDF print sheet -->
-<script>
-if( window.location.search.match( /print-pdf/gi ) ) {
-        var link = document.createElement( 'link' );
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = 'reveal.js/css/print/pdf.css';
-        document.getElementsByTagName( 'head' )[0].appendChild( link );
-}
-</script>
-
-<!--[if lt IE 9]>
-<script src="reveal.js/lib/js/html5shiv.js"></script>
-<![endif]-->
-
-<!-- Loading the mathjax macro -->
-<!-- Load mathjax -->
-    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
-    <!-- MathJax configuration -->
-    <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-            processEscapes: true,
-            processEnvironments: true
-        },
-        // Center justify equations in code and markdown cells. Elsewhere
-        // we use CSS to left justify single line equations in code cells.
-        displayAlign: 'center',
-        "HTML-CSS": {
-            styles: {'.MathJax_Display': {"margin": 0}},
-            linebreaks: { automatic: true }
-        }
-    });
-    </script>
-    <!-- End of mathjax configuration -->
-
-<!-- Get Font-awesome from cdn -->
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css">
 
 <style type="text/css">
     /*!
@@ -11773,89 +11718,62 @@ ul.typeahead-list > li > a {
 
 <style type="text/css">
 /* Overrides of notebook CSS for static HTML export */
-.reveal {
-  font-size: 130%;
-  overflow-y: scroll;
+body {
+  overflow: visible;
+  padding: 8px;
 }
-.reveal pre {
-  width: inherit;
-  padding: 0.4em;
-  margin: 0px;
-  font-family: monospace, sans-serif;
-  font-size: 80%;
-  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
-}
-.reveal pre code {
-  padding: 0px;
-}
-.reveal section img {
-  border: 0px solid black;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0);
-}
-.reveal i {
-  font-style: normal;
-  font-family: FontAwesome;
-  font-size: 2em;
-}
-.reveal .slides {
-  text-align: left;
-}
-.reveal.fade {
-  opacity: 1;
-}
-.reveal .progress {
-  position: static;
-}
-div.input_area {
-  padding: 0.06em;
-}
-div.code_cell {
-  background-color: transparent;
-}
-div.prompt {
-  width: 11ex;
-  padding: 0.4em;
-  margin: 0px;
-  font-family: monospace, sans-serif;
-  font-size: 80%;
-  text-align: right;
-}
-div.output_area pre {
-  font-family: monospace, sans-serif;
-  font-size: 80%;
-}
-div.output_prompt {
-  /* 5px right shift to account for margin in parent container */
-  margin: 5px 5px 0 0;
-}
-div.text_cell.rendered .rendered_html {
-  /* The H1 height seems miscalculated, we are just hidding the scrollbar */
-  overflow-y: hidden;
-}
-a.anchor-link {
-  /* There is still an anchor, we are only hidding it */
-  display: none;
-}
-.rendered_html p {
-  text-align: inherit;
+
+div#notebook {
+  overflow: visible;
+  border-top: none;
+}@media print {
+  div.cell {
+    display: block;
+    page-break-inside: avoid;
+  } 
+  div.output_wrapper { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+  div.output { 
+    display: block;
+    page-break-inside: avoid; 
+  }
 }
 </style>
 
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
 <link rel="stylesheet" href="custom.css">
 
-</head>
-
-
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration --></head>
 <body>
+  <div tabindex="-1" id="notebook" class="border-box-sizing">
+    <div class="container" id="notebook-container">
 
-
-<div class="reveal">
-<div class="slides">
-<section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[572]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">toy_data.sine_wave</span> <span class="k">as</span> <span class="nn">swg</span>
@@ -11865,8 +11783,9 @@ a.anchor-link {
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="n">bokeh</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">output_notebook</span><span class="p">()</span>
 
-<span class="n">d_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="s1">&#39;0010010010010010010&#39;</span><span class="p">])[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
-<span class="n">d_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">d_x</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">d_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="s1">&#39;0010010010010010010&#39;</span><span class="p">])[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+<span class="n">x_dim</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">d_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">d_x</span><span class="p">]</span><span class="o">*</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11887,7 +11806,7 @@ a.anchor-link {
 
     <div class="bk-root">
         <a href="http://bokeh.pydata.org" target="_blank" class="bk-logo bk-logo-small bk-logo-notebook"></a>
-        <span id="49cb8b98-e1e9-42a2-b211-526fe565b2a7">Loading BokehJS ...</span>
+        <span id="d17986cd-763a-49e9-9119-a0c737235ebc">Loading BokehJS ...</span>
     </div>
 </div>
 
@@ -11901,26 +11820,26 @@ a.anchor-link {
 
 
 
-<div id="a8dd5e90-33aa-4927-85e5-cc4c39c57c16"></div>
+<div id="19ed1799-6b9b-41c1-84a7-da7ebc432c9e"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
+var element = $('#19ed1799-6b9b-41c1-84a7-da7ebc432c9e');
 
 (function(global) {
   function now() {
     return new Date();
   }
 
-  var force = "1";
+  var force = true;
 
-  if (typeof (window._bokeh_onload_callbacks) === "undefined" || force !== "") {
+  if (typeof (window._bokeh_onload_callbacks) === "undefined" || force === true) {
     window._bokeh_onload_callbacks = [];
     window._bokeh_is_loading = undefined;
   }
 
 
   
-  if (typeof (window._bokeh_timeout) === "undefined" || force !== "") {
+  if (typeof (window._bokeh_timeout) === "undefined" || force === true) {
     window._bokeh_timeout = Date.now() + 5000;
     window._bokeh_failed_load = false;
   }
@@ -11943,7 +11862,8 @@ var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
 
   function display_loaded() {
     if (window.Bokeh !== undefined) {
-      Bokeh.$("#49cb8b98-e1e9-42a2-b211-526fe565b2a7").text("BokehJS successfully loaded.");
+      var el = document.getElementById("d17986cd-763a-49e9-9119-a0c737235ebc");
+      el.textContent = "BokehJS " + Bokeh.version + " successfully loaded.";
     } else if (Date.now() < window._bokeh_timeout) {
       setTimeout(display_loaded, 100)
     }
@@ -11985,13 +11905,13 @@ var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
       console.log("Bokeh: injecting script tag for BokehJS library: ", url);
       document.getElementsByTagName("head")[0].appendChild(s);
     }
-  };var element = document.getElementById("49cb8b98-e1e9-42a2-b211-526fe565b2a7");
+  };var element = document.getElementById("d17986cd-763a-49e9-9119-a0c737235ebc");
   if (element == null) {
-    console.log("Bokeh: ERROR: autoload.js configured with elementid '49cb8b98-e1e9-42a2-b211-526fe565b2a7' but no matching script tag was found. ")
+    console.log("Bokeh: ERROR: autoload.js configured with elementid 'd17986cd-763a-49e9-9119-a0c737235ebc' but no matching script tag was found. ")
     return false;
   }
 
-  var js_urls = ['https://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.js', 'https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.3.min.js'];
+  var js_urls = ["https://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.js", "https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.5.min.js"];
 
   var inline_js = [
     function(Bokeh) {
@@ -12000,30 +11920,34 @@ var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
     
     function(Bokeh) {
       
-      Bokeh.$("#49cb8b98-e1e9-42a2-b211-526fe565b2a7").text("BokehJS is loading...");
+    },
+    
+    function(Bokeh) {
+      
+      document.getElementById("d17986cd-763a-49e9-9119-a0c737235ebc").textContent = "BokehJS is loading...";
     },
     function(Bokeh) {
-      console.log("Bokeh: injecting CSS: https://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.css");
-      Bokeh.embed.inject_css("https://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.css");
-      console.log("Bokeh: injecting CSS: https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.3.min.css");
-      Bokeh.embed.inject_css("https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.3.min.css");
+      console.log("Bokeh: injecting CSS: https://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.css");
+      Bokeh.embed.inject_css("https://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.css");
+      console.log("Bokeh: injecting CSS: https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.5.min.css");
+      Bokeh.embed.inject_css("https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.5.min.css");
     }
   ];
 
   function run_inline_js() {
     
-    if ((window.Bokeh !== undefined) || (force === "1")) {
+    if ((window.Bokeh !== undefined) || (force === true)) {
       for (var i = 0; i < inline_js.length; i++) {
         inline_js[i](window.Bokeh);
-      }if (force === "1") {
+      }if (force === true) {
         display_loaded();
       }} else if (Date.now() < window._bokeh_timeout) {
       setTimeout(run_inline_js, 100);
     } else if (!window._bokeh_failed_load) {
       console.log("Bokeh: BokehJS failed to load within specified timeout.");
       window._bokeh_failed_load = true;
-    } else if (!force) {
-      var cell = $("#49cb8b98-e1e9-42a2-b211-526fe565b2a7").parents('.cell').data().cell;
+    } else if (force !== true) {
+      var cell = $(document.getElementById("d17986cd-763a-49e9-9119-a0c737235ebc")).parents('.cell').data().cell;
       cell.output_area.append_execute_result(NB_LOAD_WARNING)
     }
 
@@ -12050,10 +11974,10 @@ var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[573]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">d_X</span><span class="o">.</span><span class="n">shape</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">d_X</span><span class="o">.</span><span class="n">shape</span> <span class="c1"># No. of samples, Time, No. of dimensions</span>
 </pre></div>
 
 </div>
@@ -12066,13 +11990,13 @@ var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[573]:</div>
+<div class="prompt output_prompt">Out[2]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(10, 1, 19)</pre>
+<pre>(1, 19, 1)</pre>
 </div>
 
 </div>
@@ -12083,53 +12007,78 @@ var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1619]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tf</span><span class="o">.</span><span class="n">reset_default_graph</span><span class="p">()</span>
-<span class="n">dim_s</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="n">dim_x</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">get_x</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">dim_x</span><span class="p">]</span>
-<span class="n">x_len</span> <span class="o">=</span> <span class="n">d_X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
 
-<span class="n">io_tf</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">dim</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+</div>
+</div>
+</div>
 
-<span class="n">x_in</span> <span class="o">=</span> <span class="n">io_tf</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim_x</span><span class="p">,</span> <span class="n">x_len</span><span class="p">])</span>
-<span class="n">s0</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim_s</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;s_0&quot;</span><span class="p">)</span>
-<span class="n">T</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">dim_s</span><span class="p">,</span> <span class="n">dim_s</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Transition&quot;</span><span class="p">)</span>
-<span class="n">T0</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim_s</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Transition&quot;</span><span class="p">)</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">T0</span><span class="p">)</span>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ef</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># expand forward</span>
+<span class="n">eb</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># expand backward</span>
+</pre></div>
 
+</div>
+</div>
+</div>
 
-<span class="n">x_out_0</span> <span class="o">=</span> <span class="n">get_x</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="n">xt</span> <span class="o">=</span> <span class="n">x_out_0</span>
-<span class="n">x_in_0</span> <span class="o">=</span> <span class="n">x_in</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[141]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">state_size</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">reset_default_graph</span><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="p">[</span><span class="n">batch_size</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">])</span> <span class="c1"># [batch_size, num_steps]</span>
+<span class="n">x_in</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">x_out</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">BasicLSTMCell</span><span class="p">(</span><span class="n">state_size</span><span class="p">)</span>
+<span class="n">rnn_out</span><span class="p">,</span> <span class="n">final_state</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dynamic_rnn</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">x_in</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
-<span class="n">x_logits</span> <span class="o">=</span> <span class="n">get_x</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">T0</span><span class="p">)</span>
-<span class="n">cost_is</span>  <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_l</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">x_logits</span><span class="p">,</span> <span class="n">_l</span><span class="p">),</span> <span class="n">x_in_0</span><span class="p">)</span>
-<span class="n">cost</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">cost_is</span><span class="p">)</span>
-<span class="c1"># cost = -(tf.reduce_sum(x_in_0*tf.log(x_out_0) + (1 - x_in_0)*tf.log(1 - x_out_0), axis=0))</span>
-<span class="n">cost_ts</span> <span class="o">=</span> <span class="p">[</span><span class="n">cost</span><span class="p">]</span>
-<span class="n">x_in_ts</span> <span class="o">=</span> <span class="n">x_in_0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s1">&#39;output_embedding&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">state_size</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">),</span> <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">())</span>
+<span class="n">out_pred_logit</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">ef</span><span class="p">(</span><span class="n">rnn_out</span><span class="p">)</span> <span class="o">*</span> <span class="n">eb</span><span class="p">(</span><span class="n">eb</span><span class="p">(</span><span class="n">W</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">out_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">out_pred_logit</span><span class="p">)</span>
+<span class="n">loss_all</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">out_pred_logit</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">x_out</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">loss_all</span><span class="p">)</span>
+<span class="n">train_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">RMSPropOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x_len</span><span class="p">):</span>
-    <span class="n">x_in_t</span> <span class="o">=</span> <span class="n">x_in</span><span class="p">[:,:,</span><span class="n">t</span><span class="p">]</span>
-    <span class="n">x_in_ts</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">x_in_ts</span><span class="p">,</span> <span class="n">x_in_t</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">gen_seq_len</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="p">[])</span>
+<span class="n">gen_seq_states</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">final_state</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">gen_seq_len</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">update_state</span><span class="p">(</span><span class="n">_state</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">eb</span><span class="p">(</span><span class="n">_state</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">eb</span><span class="p">(</span><span class="n">_state</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="n">_pred_logit</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+    <span class="n">_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">_pred_logit</span><span class="p">)</span>
+    <span class="n">_states_tuple</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">rnn_cell</span><span class="o">.</span><span class="n">LSTMStateTuple</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">_next_state</span> <span class="o">=</span> <span class="n">cell</span><span class="p">(</span><span class="n">_pred</span><span class="p">,</span> <span class="n">_states_tuple</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">_next_state</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">_next_state</span><span class="o">.</span><span class="n">c</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     
-    <span class="n">x_logits</span> <span class="o">=</span> <span class="n">get_x</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">T0</span><span class="p">)</span>
-    <span class="n">cost_is</span>  <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_l</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">x_logits</span><span class="p">,</span> <span class="n">_l</span><span class="p">),</span> <span class="n">x_in_t</span><span class="p">)</span>
-    <span class="n">cost_t</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">cost_is</span><span class="p">)</span>
-    
-    <span class="n">s</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">T0</span><span class="p">)</span>
-    <span class="n">x_out_t</span> <span class="o">=</span> <span class="n">get_x</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-    <span class="n">xt</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">x_out_t</span><span class="p">))</span>
-    <span class="c1"># cost_t = -(tf.reduce_sum(x_in_t*tf.log(x_out_t) + (1 - x_in_t)*tf.log(1 - x_out_t), axis=0))</span>
-    <span class="n">cost</span> <span class="o">+=</span> <span class="n">cost_t</span>
-    <span class="n">cost_ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cost_t</span><span class="p">)</span>
+<span class="n">next_states</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">update_state</span><span class="p">,</span> <span class="n">gen_seq_states</span><span class="p">)</span>
+<span class="n">next_preds</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">eb</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">W</span><span class="p">)),</span> <span class="n">next_states</span><span class="p">)</span>
+</pre></div>
 
-<span class="n">train_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">RMSPropOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span>
+</div>
+</div>
+</div>
 
-<span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">global_variables_initializer</span><span class="p">()</span>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[142]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">global_variables_initializer</span><span class="p">()</span>
 <span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
 <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">init</span><span class="p">)</span>
 </pre></div>
@@ -12141,25 +12090,31 @@ var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1634]:</div>
+<div class="prompt input_prompt">In&nbsp;[143]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">train_step</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">x_in</span><span class="p">:</span> <span class="n">d_X</span><span class="p">})</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">d_X</span><span class="p">}</span>
+<span class="n">gen_inputs</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">d_X</span><span class="p">,</span> <span class="n">gen_seq_len</span><span class="p">:</span> <span class="n">n</span><span class="p">}</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">train_step</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="n">inputs</span><span class="p">)</span>
+</pre></div>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">x_in</span><span class="p">:</span> <span class="n">d_X</span><span class="p">}))</span>
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[144]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="n">inputs</span><span class="p">))</span>
 <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;float&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{: 0.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cost_ts</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">x_in</span><span class="p">:</span> <span class="n">d_X</span><span class="p">})))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">x_in_ts</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">x_in</span><span class="p">:</span> <span class="n">d_X</span><span class="p">}))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">x_in</span><span class="p">:</span> <span class="n">d_X</span><span class="p">}))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">x_in</span><span class="p">:</span> <span class="n">d_X</span><span class="p">}))</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">x_in</span><span class="p">:</span> <span class="n">d_X</span><span class="p">})</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">bp</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">plot_width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">plot_height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> 
-              <span class="n">x_range</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y_range</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
-<span class="n">p</span><span class="o">.</span><span class="n">image</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">w</span><span class="p">)],</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dw</span><span class="o">=</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dh</span><span class="o">=</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Viridis11&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
-<span class="n">bp</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-<span class="c1"># print(d_x[:])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Actual value</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">x_out</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Predictions</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">out_pred</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+<span class="c1"># print(&#39;Continue1\n&#39;, sess.run(cell(out_pred[:, -1, :], final_state, scope=&#39;rnn/gru_cell&#39;), feed_dict=inputs))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Continue</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">next_preds</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="n">gen_inputs</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
 </pre></div>
 
 </div>
@@ -12176,224 +12131,36 @@ var element = $('#a8dd5e90-33aa-4927-85e5-cc4c39c57c16');
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.152498
-[ 0.00  0.01  0.01  0.00  0.01  0.01  0.00  0.01  0.01  0.00  0.01  0.01
-  0.00  0.01  0.01  0.00  0.01  0.01  0.00]
-[ 0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00
-  0.00  0.00  1.00  0.00  0.00  1.00  0.00]
-[ 0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00
-  0.00  0.00  1.00  0.00  0.00  1.00  0.00]
-[[ 3.82  1.03]]
-[[-11.86  13.63]
- [-13.36 -9.40]]
+<pre>4.90539e-07
+Actual value
+ [ 0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00]
+Predictions
+ [ 0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00]
+Continue
+ [ 0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00  0.00  1.00  0.00
+  0.00  1.00  0.00  0.00]
 </pre>
 </div>
 </div>
 
-<div class="output_area">
+</div>
+</div>
 
-<div class="prompt"></div>
-
-
-
-<div class="output_html rendered_html output_subarea ">
-
-
-    <div class="bk-root">
-        <div class="plotdiv" id="69404d5d-f317-49db-913f-d62d1c59c6aa"></div>
+</div>
     </div>
-<script type="text/javascript">
-  
-  (function(global) {
-    function now() {
-      return new Date();
-    }
-  
-    var force = "";
-  
-    if (typeof (window._bokeh_onload_callbacks) === "undefined" || force !== "") {
-      window._bokeh_onload_callbacks = [];
-      window._bokeh_is_loading = undefined;
-    }
-  
-  
-    
-    if (typeof (window._bokeh_timeout) === "undefined" || force !== "") {
-      window._bokeh_timeout = Date.now() + 0;
-      window._bokeh_failed_load = false;
-    }
-  
-    var NB_LOAD_WARNING = {'data': {'text/html':
-       "<div style='background-color: #fdd'>\n"+
-       "<p>\n"+
-       "BokehJS does not appear to have successfully loaded. If loading BokehJS from CDN, this \n"+
-       "may be due to a slow or bad network connection. Possible fixes:\n"+
-       "</p>\n"+
-       "<ul>\n"+
-       "<li>re-rerun `output_notebook()` to attempt to load from CDN again, or</li>\n"+
-       "<li>use INLINE resources instead, as so:</li>\n"+
-       "</ul>\n"+
-       "<code>\n"+
-       "from bokeh.resources import INLINE\n"+
-       "output_notebook(resources=INLINE)\n"+
-       "</code>\n"+
-       "</div>"}};
-  
-    function display_loaded() {
-      if (window.Bokeh !== undefined) {
-        Bokeh.$("#69404d5d-f317-49db-913f-d62d1c59c6aa").text("BokehJS successfully loaded.");
-      } else if (Date.now() < window._bokeh_timeout) {
-        setTimeout(display_loaded, 100)
-      }
-    }
-  
-    function run_callbacks() {
-      window._bokeh_onload_callbacks.forEach(function(callback) { callback() });
-      delete window._bokeh_onload_callbacks
-      console.info("Bokeh: all callbacks have finished");
-    }
-  
-    function load_libs(js_urls, callback) {
-      window._bokeh_onload_callbacks.push(callback);
-      if (window._bokeh_is_loading > 0) {
-        console.log("Bokeh: BokehJS is being loaded, scheduling callback at", now());
-        return null;
-      }
-      if (js_urls == null || js_urls.length === 0) {
-        run_callbacks();
-        return null;
-      }
-      console.log("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
-      window._bokeh_is_loading = js_urls.length;
-      for (var i = 0; i < js_urls.length; i++) {
-        var url = js_urls[i];
-        var s = document.createElement('script');
-        s.src = url;
-        s.async = false;
-        s.onreadystatechange = s.onload = function() {
-          window._bokeh_is_loading--;
-          if (window._bokeh_is_loading === 0) {
-            console.log("Bokeh: all BokehJS libraries loaded");
-            run_callbacks()
-          }
-        };
-        s.onerror = function() {
-          console.warn("failed to load library " + url);
-        };
-        console.log("Bokeh: injecting script tag for BokehJS library: ", url);
-        document.getElementsByTagName("head")[0].appendChild(s);
-      }
-    };var element = document.getElementById("69404d5d-f317-49db-913f-d62d1c59c6aa");
-    if (element == null) {
-      console.log("Bokeh: ERROR: autoload.js configured with elementid '69404d5d-f317-49db-913f-d62d1c59c6aa' but no matching script tag was found. ")
-      return false;
-    }
-  
-    var js_urls = [];
-  
-    var inline_js = [
-      function(Bokeh) {
-        Bokeh.$(function() {
-            var docs_json = {"c48dab6d-6570-4399-bfb9-cee12bc0d634":{"roots":{"references":[{"attributes":{"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"},"ticker":{"id":"b970c04f-ad23-48e9-9030-8194f98feea1","type":"BasicTicker"}},"id":"e06f5ca1-c2bc-4fa1-87b7-3977a7d6f8ab","type":"Grid"},{"attributes":{"data_source":{"id":"fdf869ca-0612-41a0-93cb-b73994bbc6c8","type":"ColumnDataSource"},"glyph":{"id":"c3ae2846-3d20-4d8a-a3ea-9df172894e31","type":"Image"},"hover_glyph":null,"nonselection_glyph":{"id":"0859be85-d802-4c56-9de2-28f68813264e","type":"Image"},"selection_glyph":null},"id":"9190b88d-677c-46ae-9551-f05c564b4d9e","type":"GlyphRenderer"},{"attributes":{"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"}},"id":"8ce1200c-0bf8-4734-a717-79a065254403","type":"WheelZoomTool"},{"attributes":{"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"}},"id":"0d7bd5b6-44aa-42c3-8ff6-3433e234f292","type":"HelpTool"},{"attributes":{},"id":"50abbbd7-b7cf-4702-833a-789162343a54","type":"BasicTicker"},{"attributes":{"formatter":{"id":"28186d47-154d-4ef6-a0b2-75a5ee05e2cf","type":"BasicTickFormatter"},"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"},"ticker":{"id":"50abbbd7-b7cf-4702-833a-789162343a54","type":"BasicTicker"}},"id":"e4443f76-85b7-45eb-93a3-2207c7e0e86c","type":"LinearAxis"},{"attributes":{"callback":null,"end":2},"id":"8e0d35e0-7d56-4c11-84b3-3230d09bf62e","type":"Range1d"},{"attributes":{},"id":"28186d47-154d-4ef6-a0b2-75a5ee05e2cf","type":"BasicTickFormatter"},{"attributes":{},"id":"552ac7fb-5c60-43c4-868b-b9a48eb63152","type":"ToolEvents"},{"attributes":{"bottom_units":"screen","fill_alpha":{"value":0.5},"fill_color":{"value":"lightgrey"},"left_units":"screen","level":"overlay","line_alpha":{"value":1.0},"line_color":{"value":"black"},"line_dash":[4,4],"line_width":{"value":2},"plot":null,"render_mode":"css","right_units":"screen","top_units":"screen"},"id":"32a204d3-599a-4483-8543-d7c8550d2693","type":"BoxAnnotation"},{"attributes":{"formatter":{"id":"a85e0fe7-fbad-4781-b4a6-0f85d00da899","type":"BasicTickFormatter"},"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"},"ticker":{"id":"b970c04f-ad23-48e9-9030-8194f98feea1","type":"BasicTicker"}},"id":"cb2547cf-751b-4ef3-a388-59cb480cc05b","type":"LinearAxis"},{"attributes":{"color_mapper":{"id":"d6fcc8ef-3209-48f2-83cf-f9976e8fde11","type":"LinearColorMapper"},"dh":{"units":"data","value":2},"dw":{"units":"data","value":2},"image":{"field":"image"},"x":{"value":0},"y":{"value":0}},"id":"c3ae2846-3d20-4d8a-a3ea-9df172894e31","type":"Image"},{"attributes":{"palette":["#440154","#482374","#404387","#345E8D","#29788E","#208F8C","#22A784","#42BE71","#79D151","#BADE27","#FDE724"]},"id":"4df7b1a7-19f9-419a-be4b-0f2d9c6a9224","type":"LinearColorMapper"},{"attributes":{"active_drag":"auto","active_scroll":"auto","active_tap":"auto","tools":[{"id":"2bd33487-2540-4fc7-9abb-af38be973e3c","type":"PanTool"},{"id":"8ce1200c-0bf8-4734-a717-79a065254403","type":"WheelZoomTool"},{"id":"6bafbf6f-aa88-4c3b-ba73-012f13b1a7fc","type":"BoxZoomTool"},{"id":"456371f5-f743-449f-8332-7aff7852cc65","type":"SaveTool"},{"id":"4f78326f-3c87-43b1-a2ac-78f35f240f95","type":"ResetTool"},{"id":"0d7bd5b6-44aa-42c3-8ff6-3433e234f292","type":"HelpTool"}]},"id":"1b2cccac-cc5e-4fa6-aefd-10d828511bd7","type":"Toolbar"},{"attributes":{"callback":null,"end":2},"id":"2288e323-7cdd-4120-b7ec-85fa93dd5fc4","type":"Range1d"},{"attributes":{"overlay":{"id":"32a204d3-599a-4483-8543-d7c8550d2693","type":"BoxAnnotation"},"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"}},"id":"6bafbf6f-aa88-4c3b-ba73-012f13b1a7fc","type":"BoxZoomTool"},{"attributes":{},"id":"b970c04f-ad23-48e9-9030-8194f98feea1","type":"BasicTicker"},{"attributes":{"callback":null,"column_names":["image"],"data":{"image":[[[-13.3556547164917,-9.403397560119629],[-11.858627319335938,13.632144927978516]]]}},"id":"fdf869ca-0612-41a0-93cb-b73994bbc6c8","type":"ColumnDataSource"},{"attributes":{"plot":null,"text":null},"id":"e23f9a9d-f29d-4310-8cac-88a0f0c2eda2","type":"Title"},{"attributes":{"dimension":1,"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"},"ticker":{"id":"50abbbd7-b7cf-4702-833a-789162343a54","type":"BasicTicker"}},"id":"dd179399-93f6-450c-b21b-05c18fdeda68","type":"Grid"},{"attributes":{},"id":"a85e0fe7-fbad-4781-b4a6-0f85d00da899","type":"BasicTickFormatter"},{"attributes":{"palette":["#440154","#482374","#404387","#345E8D","#29788E","#208F8C","#22A784","#42BE71","#79D151","#BADE27","#FDE724"]},"id":"d6fcc8ef-3209-48f2-83cf-f9976e8fde11","type":"LinearColorMapper"},{"attributes":{"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"}},"id":"2bd33487-2540-4fc7-9abb-af38be973e3c","type":"PanTool"},{"attributes":{"below":[{"id":"cb2547cf-751b-4ef3-a388-59cb480cc05b","type":"LinearAxis"}],"left":[{"id":"e4443f76-85b7-45eb-93a3-2207c7e0e86c","type":"LinearAxis"}],"plot_height":300,"plot_width":300,"renderers":[{"id":"cb2547cf-751b-4ef3-a388-59cb480cc05b","type":"LinearAxis"},{"id":"e06f5ca1-c2bc-4fa1-87b7-3977a7d6f8ab","type":"Grid"},{"id":"e4443f76-85b7-45eb-93a3-2207c7e0e86c","type":"LinearAxis"},{"id":"dd179399-93f6-450c-b21b-05c18fdeda68","type":"Grid"},{"id":"32a204d3-599a-4483-8543-d7c8550d2693","type":"BoxAnnotation"},{"id":"9190b88d-677c-46ae-9551-f05c564b4d9e","type":"GlyphRenderer"}],"title":{"id":"e23f9a9d-f29d-4310-8cac-88a0f0c2eda2","type":"Title"},"tool_events":{"id":"552ac7fb-5c60-43c4-868b-b9a48eb63152","type":"ToolEvents"},"toolbar":{"id":"1b2cccac-cc5e-4fa6-aefd-10d828511bd7","type":"Toolbar"},"x_range":{"id":"2288e323-7cdd-4120-b7ec-85fa93dd5fc4","type":"Range1d"},"y_range":{"id":"8e0d35e0-7d56-4c11-84b3-3230d09bf62e","type":"Range1d"}},"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"},{"attributes":{"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"}},"id":"4f78326f-3c87-43b1-a2ac-78f35f240f95","type":"ResetTool"},{"attributes":{"plot":{"id":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9","subtype":"Figure","type":"Plot"}},"id":"456371f5-f743-449f-8332-7aff7852cc65","type":"SaveTool"},{"attributes":{"color_mapper":{"id":"4df7b1a7-19f9-419a-be4b-0f2d9c6a9224","type":"LinearColorMapper"},"dh":{"units":"data","value":2},"dw":{"units":"data","value":2},"image":{"field":"image"},"x":{"value":0},"y":{"value":0}},"id":"0859be85-d802-4c56-9de2-28f68813264e","type":"Image"}],"root_ids":["6e680b6e-5a9a-4892-9a52-ef4b0fa886e9"]},"title":"Bokeh Application","version":"0.12.3"}};
-            var render_items = [{"docid":"c48dab6d-6570-4399-bfb9-cee12bc0d634","elementid":"69404d5d-f317-49db-913f-d62d1c59c6aa","modelid":"6e680b6e-5a9a-4892-9a52-ef4b0fa886e9"}];
-            
-            Bokeh.embed.embed_items(docs_json, render_items);
-        });
-      },
-      function(Bokeh) {
-      }
-    ];
-  
-    function run_inline_js() {
-      
-      if ((window.Bokeh !== undefined) || (force === "1")) {
-        for (var i = 0; i < inline_js.length; i++) {
-          inline_js[i](window.Bokeh);
-        }if (force === "1") {
-          display_loaded();
-        }} else if (Date.now() < window._bokeh_timeout) {
-        setTimeout(run_inline_js, 100);
-      } else if (!window._bokeh_failed_load) {
-        console.log("Bokeh: BokehJS failed to load within specified timeout.");
-        window._bokeh_failed_load = true;
-      } else if (!force) {
-        var cell = $("#69404d5d-f317-49db-913f-d62d1c59c6aa").parents('.cell').data().cell;
-        cell.output_area.append_execute_result(NB_LOAD_WARNING)
-      }
-  
-    }
-  
-    if (window._bokeh_is_loading === 0) {
-      console.log("Bokeh: BokehJS loaded, going straight to plotting");
-      run_inline_js();
-    } else {
-      load_libs(js_urls, function() {
-        console.log("Bokeh: BokehJS plotting callback run at", now());
-        run_inline_js();
-      });
-    }
-  }(this));
-</script>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></section></section>
-</div>
-</div>
-
-<script>
-var tmp_Interval = setInterval;
-setInterval = function(a, b){};
-require(
-    {
-      // it makes sense to wait a little bit when you are loading
-      // reveal from a cdn in a slow connection environment
-      waitSeconds: 15
-    },
-    [
-      "reveal.js/lib/js/head.min.js",
-      "reveal.js/js/reveal.js"
-    ],
-    function(head, Reveal){
-        // Full list of configuration options available here: https://github.com/hakimel/reveal.js#configuration
-        Reveal.initialize({
-            controls: true,
-            progress: true,
-            history: true,
-            theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-            // Optional libraries used to extend on reveal.js
-            dependencies: [
-                { src: "reveal.js/lib/js/classList.js",
-                  condition: function() { return !document.body.classList; } },
-                { src: "reveal.js/plugin/notes/notes.js",
-                  async: true,
-                  condition: function() { return !!document.body.classList; } }
-            ]
-        });
-        Reveal.configure({ transitionSpeed: 'fast' });
-        Reveal.configure({ touch: 'false' });
-        Reveal.configure({ center: 'false' });
-        Reveal.configure({ viewDistance: 1 });
-        var update = function(event){
-          if(MathJax.Hub.getAllJax(Reveal.getCurrentSlide())){
-            MathJax.Hub.Rerender(Reveal.getCurrentSlide());
-          }
-        };
-        Reveal.addEventListener('slidechanged', update);
-        var update_scroll = function(event){
-          $(".reveal").scrollTop(0);
-        };
-        Reveal.addEventListener('slidechanged', update_scroll);
-        setTimeout(function(){setInterval = tmp_Interval;}, 0);
-    }
-);
-</script>
-
+  </div>
 </body>
+
+ 
 
 
 </html>
